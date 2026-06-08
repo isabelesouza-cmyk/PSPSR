@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="stylesheet" href="style.css"> 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSPSR — Sistema de Prontuário</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<script src="script.js"></script>
+<body>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/><path d="M11 8h2v8h-2z" fill="rgba(255,255,255,0.3)"/></svg>
+    </div>
+    <div class="sidebar-logo-text">
+      <strong>PSPSR</strong>
+      <span>Prontuário Eletrônico</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <button class="nav-item active" onclick="showPage('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('pacientes', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Pacientes
+    </button>
+    <button class="nav-item" onclick="showPage('evolucao', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Evolução Clínica
+    </button>
+    <button class="nav-item" onclick="showPage('profissionais', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profissionais
+    </button>
+    <div class="nav-section-label" style="margin-top:8px;">Sistema</div>
+    <button class="nav-item" onclick="showPage('configuracoes', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      Configurações
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="nav-item danger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair
+    </button>
+  </div>
+</aside>
+
+<!-- HEADER -->
+<header class="header">
+  <button class="hamburger" onclick="toggleSidebar()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <div class="header-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Buscar paciente, prontuário...">
+  </div>
+
+  <div class="header-spacer"></div>
+
+  <div class="header-date">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span id="currentDate"></span>
+  </div>
+
+  <div class="header-divider"></div>
+
+  <div class="header-user">
+    <div class="avatar">DA</div>
+    <div class="header-user-info">
+      <strong>Dra. Ana Ferreira</strong>
+      <span>Psicóloga CRP 06/123456</span>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header">
+      <div class="page-title">
+        <div class="breadcrumb">Sistema <span>/ Dashboard</span></div>
+        <h1>Visão Geral</h1>
+        <p>Resumo dos atendimentos e indicadores clínicos</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('novaEvolucaoModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova Evolução
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-number">47</div>
+          <div class="stat-label">Total de Pacientes</div>
+          <div class="stat-change up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            +3 este mês
+          </div>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-number">128</div>
+          <div class="stat-label">Atendimentos Realizados</div>
+          <div class="stat-change up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            +12 este mês
+          </div>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-number">19</div>
+          <div class="stat-label">Encaminhamentos</div>
+          <div class="stat-change down">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 13 12 18 7 13"/><polyline points="17 6 12 11 7 6"/></svg>
+            −2 este mês
+          </div>
+        </div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-number">312</div>
+          <div class="stat-label">Evoluções Registradas</div>
+          <div class="stat-change up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            +28 este mês
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Recent patients -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Atendimentos Recentes</h2>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('pacientes', null)">Ver todos</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Data</th>
+                <th>Profissional</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="td-name">Maria Souza<small>CPF: 123.456.789-00</small></span></td>
+                <td>07/06/2025</td>
+                <td>Dra. Ana Ferreira</td>
+                <td><span class="badge badge-active">Ativo</span></td>
+                <td><button class="btn btn-secondary btn-sm" onclick="showPage('evolucao',null)">Ver</button></td>
+              </tr>
+              <tr>
+                <td><span class="td-name">João Oliveira<small>CPF: 987.654.321-11</small></span></td>
+                <td>06/06/2025</td>
+                <td>Dr. Carlos Lima</td>
+                <td><span class="badge badge-active">Ativo</span></td>
+                <td><button class="btn btn-secondary btn-sm">Ver</button></td>
+              </tr>
+              <tr>
+                <td><span class="td-name">Lucia Ramos<small>CPF: 456.123.789-22</small></span></td>
+                <td>05/06/2025</td>
+                <td>Dra. Ana Ferreira</td>
+                <td><span class="badge badge-pending">Em espera</span></td>
+                <td><button class="btn btn-secondary btn-sm">Ver</button></td>
+              </tr>
+              <tr>
+                <td><span class="td-name">Roberto Costa<small>CPF: 321.654.987-33</small></span></td>
+                <td>04/06/2025</td>
+                <td>Dr. Carlos Lima</td>
+                <td><span class="badge badge-inactive">Inativo</span></td>
+                <td><button class="btn btn-secondary btn-sm">Ver</button></td>
+              </tr>
+              <tr>
+                <td><span class="td-name">Fernanda Melo<small>CPF: 159.357.753-44</small></span></td>
+                <td>03/06/2025</td>
+                <td>Dra. Ana Ferreira</td>
+                <td><span class="badge badge-active">Ativo</span></td>
+                <td><button class="btn btn-secondary btn-sm">Ver</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Atividade Recente</h2>
+        </div>
+        <div class="card-body">
+          <div class="activity-item">
+            <div class="activity-dot blue"></div>
+            <div class="activity-info">
+              <strong>Nova evolução registrada</strong>
+              <span>Maria Souza — Sessão 12</span>
+            </div>
+            <div class="activity-time">Agora</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot green"></div>
+            <div class="activity-info">
+              <strong>Paciente cadastrado</strong>
+              <span>Pedro Alves foi adicionado</span>
+            </div>
+            <div class="activity-time">2h</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot orange"></div>
+            <div class="activity-info">
+              <strong>Encaminhamento emitido</strong>
+              <span>Lucia Ramos → Psiquiatria</span>
+            </div>
+            <div class="activity-time">5h</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot blue"></div>
+            <div class="activity-info">
+              <strong>Evolução atualizada</strong>
+              <span>Roberto Costa — Sessão 8</span>
+            </div>
+            <div class="activity-time">Ontem</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot green"></div>
+            <div class="activity-info">
+              <strong>Alta registrada</strong>
+              <span>Carlos Silva — Concluído</span>
+            </div>
+            <div class="activity-time">Ontem</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot orange"></div>
+            <div class="activity-info">
+              <strong>Atendimento reagendado</strong>
+              <span>Fernanda Melo — 10/06</span>
+            </div>
+            <div class="activity-time">2 dias</div>
+          </div>
+        </div>
+
+        <div class="card-body" style="border-top:1px solid var(--gray-100); padding-top:18px;">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--gray-600);margin-bottom:12px;">Capacidade do mês</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.77rem;margin-bottom:4px;">
+                <span style="color:var(--gray-600)">Atendimentos</span>
+                <span style="font-weight:600;color:var(--gray-800)">128 / 160</span>
+              </div>
+              <div class="progress-bar-wrap"><div class="progress-bar" style="width:80%"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.77rem;margin-bottom:4px;">
+                <span style="color:var(--gray-600)">Evoluções</span>
+                <span style="font-weight:600;color:var(--gray-800)">312 / 400</span>
+              </div>
+              <div class="progress-bar-wrap"><div class="progress-bar" style="width:78%;background:var(--accent)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.77rem;margin-bottom:4px;">
+                <span style="color:var(--gray-600)">Encaminhamentos</span>
+                <span style="font-weight:600;color:var(--gray-800)">19 / 30</span>
+              </div>
+              <div class="progress-bar-wrap"><div class="progress-bar" style="width:63%;background:var(--warning)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PACIENTES ===== -->
+  <div id="page-pacientes" class="page">
+    <div class="page-header">
+      <div class="page-title">
+        <div class="breadcrumb">Sistema <span>/ Pacientes</span></div>
+        <h1>Gestão de Pacientes</h1>
+        <p>Cadastro e acompanhamento de pacientes do serviço</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('novoPacienteModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Paciente
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Lista de Pacientes</h2>
+        <span style="font-size:0.78rem;color:var(--gray-400);">47 pacientes cadastrados</span>
+      </div>
+      <div class="card-body" style="padding-bottom:0;">
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar por nome ou CPF..." oninput="filtrarPacientes(this.value)">
+          </div>
+          <select class="form-control" style="width:auto;padding:9px 14px;" onchange="filtrarStatus(this.value)">
+            <option value="">Todos os status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+            <option value="espera">Em espera</option>
+          </select>
+          <button class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Exportar
+          </button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table id="pacientesTable">
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>CPF</th>
+              <th>Nascimento</th>
+              <th>Último Atendimento</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="pacientesBody">
+            <tr>
+              <td><span class="td-name">Maria Aparecida Souza<small>Prontuário #001</small></span></td>
+              <td>123.456.789-00</td>
+              <td>14/03/1985</td>
+              <td>07/06/2025</td>
+              <td><span class="badge badge-active">Ativo</span></td>
+              <td><button class="btn btn-secondary btn-sm" onclick="showPage('evolucao',null)">Visualizar</button></td>
+            </tr>
+            <tr>
+              <td><span class="td-name">João Carlos Oliveira<small>Prontuário #002</small></span></td>
+              <td>987.654.321-11</td>
+              <td>22/07/1978</td>
+              <td>06/06/2025</td>
+              <td><span class="badge badge-active">Ativo</span></td>
+              <td><button class="btn btn-secondary btn-sm">Visualizar</button></td>
+            </tr>
+            <tr>
+              <td><span class="td-name">Lucia Helena Ramos<small>Prontuário #003</small></span></td>
+              <td>456.123.789-22</td>
+              <td>05/11/1992</td>
+              <td>05/06/2025</td>
+              <td><span class="badge badge-pending">Em espera</span></td>
+              <td><button class="btn btn-secondary btn-sm">Visualizar</button></td>
+            </tr>
+            <tr>
+              <td><span class="td-name">Roberto Antônio Costa<small>Prontuário #004</small></span></td>
+              <td>321.654.987-33</td>
+              <td>30/01/1967</td>
+              <td>04/06/2025</td>
+              <td><span class="badge badge-inactive">Inativo</span></td>
+              <td><button class="btn btn-secondary btn-sm">Visualizar</button></td>
+            </tr>
+            <tr>
+              <td><span class="td-name">Fernanda Cristina Melo<small>Prontuário #005</small></span></td>
+              <td>159.357.753-44</td>
+              <td>18/09/1998</td>
+              <td>03/06/2025</td>
+              <td><span class="badge badge-active">Ativo</span></td>
+              <td><button class="btn btn-secondary btn-sm">Visualizar</button></td>
+            </tr>
+            <tr>
+              <td><span class="td-name">Pedro Henrique Alves<small>Prontuário #006</small></span></td>
+              <td>753.159.258-55</td>
+              <td>09/05/2001</td>
+              <td>01/06/2025</td>
+              <td><span class="badge badge-active">Ativo</span></td>
+              <td><button class="btn btn-secondary btn-sm">Visualizar</button></td>
+            </tr>
+            <tr>
+              <td><span class="td-name">Ana Paula Ferreira<small>Prontuário #007</small></span></td>
+              <td>852.963.741-66</td>
+              <td>27/12/1989</td>
+              <td>29/05/2025</td>
+              <td><span class="badge badge-inactive">Inativo</span></td>
+              <td><button class="btn btn-secondary btn-sm">Visualizar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer">
+        Exibindo 7 de 47 pacientes — <a href="#" style="color:var(--primary);font-weight:600;">Carregar mais</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EVOLUÇÃO CLÍNICA ===== -->
+  <div id="page-evolucao" class="page">
+    <div class="page-header">
+      <div class="page-title">
+        <div class="breadcrumb">Sistema <span>/ Evolução Clínica</span></div>
+        <h1>Evolução Clínica</h1>
+        <p>Registro e acompanhamento das evoluções por paciente</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('novaEvolucaoModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Registrar Evolução
+      </button>
+    </div>
+
+    <!-- Patient profile -->
+    <div class="card section">
+      <div class="patient-profile-header">
+        <div class="patient-avatar">MS</div>
+        <div class="patient-profile-info">
+          <h3>Maria Aparecida Souza</h3>
+          <div class="patient-meta">
+            <div class="patient-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+              <span>Nascimento: <strong>14/03/1985</strong> (40 anos)</span>
+            </div>
+            <div class="patient-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>CPF: <strong>123.456.789-00</strong></span>
+            </div>
+            <div class="patient-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 7a19.79 19.79 0 01-3.07-8.67A2 2 0 011.92 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+              <span>Contato: <strong>(11) 99999-8888</strong></span>
+            </div>
+            <div class="patient-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Prontuário: <strong>#001</strong></span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="badge badge-active" style="height:fit-content;">Ativo</span>
+          <button class="btn btn-secondary btn-sm">Editar Paciente</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:16px;">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('evolucoes', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Evoluções
+          </button>
+          <button class="tab-btn" onclick="switchTab('encaminhamentos', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Encaminhamentos
+          </button>
+          <button class="tab-btn" onclick="switchTab('historico', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Histórico
+          </button>
+        </div>
+
+        <!-- Tab: Evoluções -->
+        <div id="tab-evolucoes" class="tab-content active">
+          <div class="evolution-entry">
+            <div class="evolution-date-col">
+              <div class="evolution-date-box">
+                <div class="day">07</div>
+                Jun 2025
+              </div>
+            </div>
+            <div class="evolution-body">
+              <h4>Sessão 12 — Dra. Ana Ferreira</h4>
+              <p>Paciente apresentou melhora significativa nos sintomas de ansiedade relatados nas sessões anteriores. Demonstrou maior capacidade de regulação emocional e aplicação das técnicas de respiração. Foram trabalhados aspectos de autoestima e relações interpessoais. Paciente refere boa adesão ao plano terapêutico proposto.</p>
+              <div class="evolution-tags">
+                <span class="evo-tag">Ansiedade</span>
+                <span class="evo-tag">Regulação Emocional</span>
+                <span class="evo-tag">TCC</span>
+                <span class="evo-tag">Sessão Individual</span>
+              </div>
+            </div>
+          </div>
+          <div class="evolution-entry">
+            <div class="evolution-date-col">
+              <div class="evolution-date-box" style="background:var(--gray-400);">
+                <div class="day">24</div>
+                Mai 2025
+              </div>
+            </div>
+            <div class="evolution-body">
+              <h4>Sessão 11 — Dra. Ana Ferreira</h4>
+              <p>Sessão focada na identificação de pensamentos automáticos negativos. Paciente relata episódios de insônia relacionados ao estresse no trabalho. Proposta de registro de pensamentos diários para a próxima sessão. Boa vinculação terapêutica mantida.</p>
+              <div class="evolution-tags">
+                <span class="evo-tag">Insônia</span>
+                <span class="evo-tag">Estresse</span>
+                <span class="evo-tag">Registro de Pensamentos</span>
+              </div>
+            </div>
+          </div>
+          <div class="evolution-entry">
+            <div class="evolution-date-col">
+              <div class="evolution-date-box" style="background:var(--gray-400);">
+                <div class="day">10</div>
+                Mai 2025
+              </div>
+            </div>
+            <div class="evolution-body">
+              <h4>Sessão 10 — Dra. Ana Ferreira</h4>
+              <p>Revisão dos objetivos terapêuticos traçados no início do acompanhamento. Evolução positiva observada nos indicadores de bem-estar subjetivo. Foram discutidas estratégias de enfrentamento para situações de alta demanda emocional.</p>
+              <div class="evolution-tags">
+                <span class="evo-tag">Avaliação Terapêutica</span>
+                <span class="evo-tag">Bem-estar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Encaminhamentos -->
+        <div id="tab-encaminhamentos" class="tab-content">
+          <div class="alert alert-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Nenhum encaminhamento registrado para esta paciente.
+          </div>
+          <button class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Emitir Encaminhamento
+          </button>
+        </div>
+
+        <!-- Tab: Histórico -->
+        <div id="tab-historico" class="tab-content">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot active"></div>
+              <h5>Sessão 12 — Evolução registrada</h5>
+              <p>Dra. Ana Ferreira</p>
+              <time>07/06/2025 às 14:30</time>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot done"></div>
+              <h5>Sessão 11 — Evolução registrada</h5>
+              <p>Dra. Ana Ferreira</p>
+              <time>24/05/2025 às 10:15</time>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot done"></div>
+              <h5>Sessão 10 — Evolução registrada</h5>
+              <p>Dra. Ana Ferreira</p>
+              <time>10/05/2025 às 09:00</time>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot done"></div>
+              <h5>Paciente cadastrada no sistema</h5>
+              <p>Admissão realizada</p>
+              <time>15/01/2025 às 08:00</time>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROFISSIONAIS ===== -->
+  <div id="page-profissionais" class="page">
+    <div class="page-header">
+      <div class="page-title">
+        <div class="breadcrumb">Sistema <span>/ Profissionais</span></div>
+        <h1>Equipe de Profissionais</h1>
+        <p>Gestão da equipe multiprofissional do serviço</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('novoProfissionalModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Profissional
+      </button>
+    </div>
+
+    <div class="pro-grid">
+      <div class="professional-card">
+        <div class="pro-avatar" style="background:linear-gradient(135deg,#1E40D8,#3B5FE8);">AF</div>
+        <div class="pro-info">
+          <h4>Dra. Ana Ferreira</h4>
+          <span>Psicóloga — CRP 06/123456</span>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="badge badge-active">Ativo</span>
+            <span class="evo-tag">TCC</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;">Detalhes</button>
+      </div>
+      <div class="professional-card">
+        <div class="pro-avatar" style="background:linear-gradient(135deg,#059669,#10B981);">CL</div>
+        <div class="pro-info">
+          <h4>Dr. Carlos Lima</h4>
+          <span>Psiquiatra — CRM 12/34567</span>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="badge badge-active">Ativo</span>
+            <span class="evo-tag">Farmacoterapia</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;">Detalhes</button>
+      </div>
+      <div class="professional-card">
+        <div class="pro-avatar" style="background:linear-gradient(135deg,#7C3AED,#8B5CF6);">BM</div>
+        <div class="pro-info">
+          <h4>Dra. Beatriz Moraes</h4>
+          <span>Assistente Social — CRESS 06/7890</span>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="badge badge-active">Ativo</span>
+            <span class="evo-tag">Proteção Social</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;">Detalhes</button>
+      </div>
+      <div class="professional-card">
+        <div class="pro-avatar" style="background:linear-gradient(135deg,#D97706,#F59E0B);">RS</div>
+        <div class="pro-info">
+          <h4>Rafael Santos</h4>
+          <span>Terapeuta Ocupacional — CREFITO 6/12345</span>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="badge badge-inactive">Inativo</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;">Detalhes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONFIGURAÇÕES ===== -->
+  <div id="page-configuracoes" class="page">
+    <div class="page-header">
+      <div class="page-title">
+        <div class="breadcrumb">Sistema <span>/ Configurações</span></div>
+        <h1>Configurações do Sistema</h1>
+        <p>Preferências, segurança e personalização</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div class="card">
+        <div class="card-header"><h2>Perfil do Usuário</h2></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px;">
+            <div class="avatar" style="width:56px;height:56px;font-size:1.1rem;">DA</div>
+            <div>
+              <div style="font-weight:600;color:var(--gray-800);">Dra. Ana Ferreira</div>
+              <div style="font-size:0.78rem;color:var(--gray-500);">Psicóloga — CRP 06/123456</div>
+              <button class="btn btn-secondary btn-sm" style="margin-top:8px;">Alterar foto</button>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nome completo</label>
+              <input type="text" class="form-control" value="Dra. Ana Ferreira">
+            </div>
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" class="form-control" value="ana.ferreira@saude.gov.br">
+            </div>
+            <div class="form-group">
+              <label>Registro profissional</label>
+              <input type="text" class="form-control" value="CRP 06/123456">
+            </div>
+            <div class="form-group">
+              <label>Telefone</label>
+              <input type="text" class="form-control" value="(11) 98888-7777">
+            </div>
+          </div>
+          <div style="margin-top:18px;text-align:right;">
+            <button class="btn btn-primary btn-sm" onclick="showNotification('Perfil atualizado com sucesso!', 'success')">Salvar alterações</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div class="card">
+          <div class="card-header"><h2>Notificações</h2></div>
+          <div class="card-body">
+            <div class="config-section">
+              <div class="config-row">
+                <div class="config-row-info">
+                  <h4>Alertas por e-mail</h4>
+                  <p>Receber notificações de novos atendimentos</p>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="config-row">
+                <div class="config-row-info">
+                  <h4>Lembretes de sessão</h4>
+                  <p>Notificar 1 hora antes do atendimento</p>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="config-row">
+                <div class="config-row-info">
+                  <h4>Relatórios semanais</h4>
+                  <p>Envio automático toda segunda-feira</p>
+                </div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>Segurança</h2></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Senha atual</label>
+                <input type="password" class="form-control" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label>Nova senha</label>
+                <input type="password" class="form-control" placeholder="••••••••">
+              </div>
+            </div>
+            <div style="margin-top:16px;text-align:right;">
+              <button class="btn btn-primary btn-sm" onclick="showNotification('Senha alterada!','success')">Alterar senha</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===== MODAL: Novo Paciente ===== -->
+<div class="modal-overlay" id="novoPacienteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Cadastrar Novo Paciente</h3>
+      <button class="modal-close" onclick="closeModal('novoPacienteModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section-title" style="margin-bottom:16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Dados Pessoais
+      </div>
+      <div class="form-grid form-grid-2" style="margin-bottom:20px;">
+        <div class="form-group">
+          <label>Nome completo <span class="required">*</span></label>
+          <input type="text" class="form-control" placeholder="Nome do paciente">
+        </div>
+        <div class="form-group">
+          <label>Nome social</label>
+          <input type="text" class="form-control" placeholder="Se aplicável">
+        </div>
+        <div class="form-group">
+          <label>CPF <span class="required">*</span></label>
+          <input type="text" class="form-control" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label>Data de nascimento <span class="required">*</span></label>
+          <input type="date" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Sexo</label>
+          <select class="form-control">
+            <option>Feminino</option>
+            <option>Masculino</option>
+            <option>Não-binário</option>
+            <option>Prefiro não informar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Telefone de contato</label>
+          <input type="text" class="form-control" placeholder="(00) 00000-0000">
+        </div>
+      </div>
+      <div class="form-section-title" style="margin-bottom:16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Endereço
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group" style="grid-column:span 2;">
+          <label>Logradouro</label>
+          <input type="text" class="form-control" placeholder="Rua, Avenida...">
+        </div>
+        <div class="form-group">
+          <label>Bairro</label>
+          <input type="text" class="form-control" placeholder="Bairro">
+        </div>
+        <div class="form-group">
+          <label>Município</label>
+          <input type="text" class="form-control" placeholder="Cidade">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('novoPacienteModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarPaciente()">Cadastrar Paciente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Nova Evolução ===== -->
+<div class="modal-overlay" id="novaEvolucaoModal">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <h3>Registrar Evolução Clínica</h3>
+      <button class="modal-close" onclick="closeModal('novaEvolucaoModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid form-grid-2" style="margin-bottom:18px;">
+        <div class="form-group">
+          <label>Paciente <span class="required">*</span></label>
+          <select class="form-control">
+            <option>Maria Aparecida Souza</option>
+            <option>João Carlos Oliveira</option>
+            <option>Lucia Helena Ramos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data da sessão <span class="required">*</span></label>
+          <input type="date" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Tipo de atendimento</label>
+          <select class="form-control">
+            <option>Sessão individual</option>
+            <option>Sessão em grupo</option>
+            <option>Visita domiciliar</option>
+            <option>Atendimento familiar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Número da sessão</label>
+          <input type="number" class="form-control" placeholder="Ex: 12">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Relato da evolução <span class="required">*</span></label>
+        <textarea class="form-control" rows="5" placeholder="Descreva a evolução clínica do paciente nesta sessão..."></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Áreas temáticas</label>
+        <div class="chip-group" id="chipGroup">
+          <button class="chip" onclick="toggleChip(this)">Ansiedade</button>
+          <button class="chip" onclick="toggleChip(this)">Depressão</button>
+          <button class="chip" onclick="toggleChip(this)">Autoestima</button>
+          <button class="chip" onclick="toggleChip(this)">Trauma</button>
+          <button class="chip" onclick="toggleChip(this)">Relações interpessoais</button>
+          <button class="chip" onclick="toggleChip(this)">Regulação emocional</button>
+          <button class="chip" onclick="toggleChip(this)">TCC</button>
+          <button class="chip" onclick="toggleChip(this)">Farmacoterapia</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Próximos passos</label>
+        <textarea class="form-control" rows="2" placeholder="Planos e objetivos para a próxima sessão..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('novaEvolucaoModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEvolucao()">Salvar Evolução</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Novo Profissional ===== -->
+<div class="modal-overlay" id="novoProfissionalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Cadastrar Profissional</h3>
+      <button class="modal-close" onclick="closeModal('novoProfissionalModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid form-grid-2">
+        <div class="form-group" style="grid-column:span 2;">
+          <label>Nome completo <span class="required">*</span></label>
+          <input type="text" class="form-control" placeholder="Nome do profissional">
+        </div>
+        <div class="form-group">
+          <label>Categoria profissional <span class="required">*</span></label>
+          <select class="form-control">
+            <option>Psicólogo(a)</option>
+            <option>Psiquiatra</option>
+            <option>Assistente Social</option>
+            <option>Terapeuta Ocupacional</option>
+            <option>Enfermeiro(a)</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Registro profissional <span class="required">*</span></label>
+          <input type="text" class="form-control" placeholder="CRP, CRM, CRESS...">
+        </div>
+        <div class="form-group">
+          <label>E-mail institucional</label>
+          <input type="email" class="form-control" placeholder="email@saude.gov.br">
+        </div>
+        <div class="form-group">
+          <label>Telefone</label>
+          <input type="text" class="form-control" placeholder="(00) 00000-0000">
+        </div>
+        <div class="form-group" style="grid-column:span 2;">
+          <label>Status</label>
+          <select class="form-control">
+            <option>Ativo</option>
+            <option>Inativo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('novoProfissionalModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarProfissional()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION TOAST -->
+<div class="notification" id="notification">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="notificationMsg">Operação realizada!</span>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
